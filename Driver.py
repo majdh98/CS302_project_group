@@ -24,7 +24,8 @@ for file in files:
     m = int(g[1])
     
     # create a graph
-    g = Graph(n, m)
+    g = Graph_kruskal(n, m)
+    g_2 = Graph_prim(n, m)
     
     # fill graph
     for i in range(1, num_lines-1):
@@ -32,11 +33,14 @@ for file in files:
         u = int(line[0])
         v = int(line[1])
         w = float(line[2])
-        g.add_edge(u, v, w)
+        g.add_edge([u, v, w])
+        g_2.add_edge([u, v, w])
     
     # run kruskal
     cost, MST = g.kruskal()
-    print("Kruskal MST cost = " + str(cost) + " known cost = " + str(file[num_lines-1]))
+    print("Kruskal's method MST cost = " + str(cost) + " known cost = " + str(file[num_lines-1]))
+    cost, MST = g_2.prim()
+    print("Prim's method MST cost = " + str(cost) + " known cost = " + str(file[num_lines-1]))
         
         
     
