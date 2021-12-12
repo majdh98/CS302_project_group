@@ -110,7 +110,7 @@ class Graph_prim:
     def update_possible_vertices(self, possible_vertices, u):
         for v in range(self.n):
             if(possible_vertices[v] > self.edges[u][v] and possible_vertices[v] != -math.inf):
-               possible_vertices[v] = self.edges[u][v]
+                possible_vertices[v] = self.edges[u][v]
         
     def prim(self):
         
