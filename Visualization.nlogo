@@ -10,12 +10,15 @@
 breed [vertices vertex]                          ; the nodes of the graph
 
 vertices-own [
-  group                                          ; shows the group of the vertex in a search tree
+  group                                          ; the group of the vertex
+  visited-vertex?                                ; if the node has been visited already
 ]
 
 links-own [
   in-MST?                                        ; if the link is in the MST or not
   weight                                         ; the weight of the edge
+  possible?                                      ; if it is possible to travel to the edge
+  visited?                                       ; if the edge has already been visited
 ]
 
 ; Global variables
@@ -54,8 +57,8 @@ end
 
 ; Runs the program
 to go
-  MST-kruskal
-  if remove-non-MST? [ ask links with [in-MST? = False] [die] ]
+  ifelse MST-algorithm = "Kruskal's" [ MST-Kruskal ] [ MST-Prim ]
+  if remove-non-MST? [ ask links with [not in-MST?] [ die ] ]
 end
 
 ; =========== FILE READ FUNCTIONS ===========
@@ -83,6 +86,7 @@ to initialize-graph
     set group who
     setxy random-xcor random-ycor
     set label word who "   "
+    set visited-vertex? False
   ]
 
   let counter 0
@@ -92,7 +96,7 @@ to initialize-graph
     let vertex1 item 0 edge
     let vertex2 item 1 edge
     let edge-weight item 2 edge
-    ask vertex vertex1 [ create-link-with vertex vertex2 [ set weight edge-weight set in-MST? False] ]
+    ask vertex vertex1 [ create-link-with vertex vertex2 [ set weight edge-weight set in-MST? False set possible? False set visited? False ] ]
     set counter counter + 1
   ]
   ; Enable or disable the visibility of weight of edges
@@ -106,30 +110,75 @@ end
 
 ; =========== KRUSKAL FUNCTIONS ===========
 ; Kruskal's algorithm for MST
-to MST-kruskal
+to MST-Kruskal
+  ; Sorts the list first
   sort-by-weight
+
   let counter 0;
+  ; Loops through the edges in the list
   while [counter < number-edges] [
+    ; Prepare to compare edge
     let edge item counter list-graph
     let vertex1 item 0 edge
     let vertex2 item 1 edge
-    ask link vertex1 vertex2 [set color black set thickness 0.1]
+    ask link vertex1 vertex2 [ set color black set thickness 0.1 ]
     wait delay
 
     let vertex1-group [group] of vertex vertex1
     let vertex2-group [group] of vertex vertex2
+    ; If the vertexes are in different groups
     if vertex1-group != vertex2-group [
-      ask link vertex1 vertex2 [ set in-MST? True set color green]
-      ask vertex vertex1 [set color red]
-      ask vertex vertex2 [set color red]
-      ask vertices with [group = vertex1-group] [set group vertex2-group]
+      ; Include the edge in the MST
+      ask link vertex1 vertex2 [
+        set in-MST? True
+        set color green
+        ask both-ends [ set color red ]
+      ]
+      ; Set both vertices to have the same group
+      ask vertices with [group = vertex1-group] [ set group vertex2-group ]
     ]
     set counter counter + 1
   ]
 end
 
+; Sorts the list by weight
 to sort-by-weight
   set list-sorted-graph sort-by [ [a b] -> (item 2 a) < (item 2 b) ] list-graph
+end
+
+; =========== PRIM FUNCTIONS ===========
+; Prim's algorithm for MST
+to MST-Prim
+  ; Sets a random root
+  ask one-of vertices [
+    set color pink
+    ask my-links [set possible? True]
+    set visited-vertex? True
+  ]
+
+  ; While there are possible vertices to visit
+  while [any? links with [possible?] and any? vertices with [not visited-vertex?]] [
+    ask min-one-of links with [possible? and not visited?] [weight] [
+      set color black
+      wait delay
+      ; If they are both visited, disregard the edge
+      ifelse [visited-vertex?] of end1 and [visited-vertex?] of end2 [
+        set visited? True
+        set possible? False
+      ][
+      ; Else set the link to visited and include in the MST
+        set color green
+        set in-MST? True
+        set visited? True
+        ; Set the vertex to be visited and add the possible edges
+        ask one-of both-ends with [not visited-vertex?] [
+          set visited-vertex? True
+          set color red
+          ask my-links with [not visited?] [ set possible? True ]
+        ]
+      ]
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -167,7 +216,7 @@ CHOOSER
 MST-algorithm
 MST-algorithm
 "Kruskal's" "Prim's"
-0
+1
 
 CHOOSER
 -1
@@ -177,7 +226,7 @@ CHOOSER
 file-name
 file-name
 "Int-1000-2000.txt" "Int-1000-dense.txt" "Int-40-80.txt" "Int-500-dense.txt" "Real-1000-2000.txt" "Real-1000-dense.txt" "Real-50-100.txt" "Real-500-1000.txt" "Real-500-dense.txt"
-6
+2
 
 BUTTON
 27
@@ -203,7 +252,7 @@ SWITCH
 140
 show-weight?
 show-weight?
-1
+0
 1
 -1000
 
@@ -233,7 +282,7 @@ delay
 delay
 0
 2
-0.1
+0.4
 0.1
 1
 NIL
@@ -246,7 +295,7 @@ SWITCH
 172
 remove-non-MST?
 remove-non-MST?
-0
+1
 1
 -1000
 
@@ -265,17 +314,8 @@ Then, it constructs the graph and runs the specified algorithm.
 Change the variable file-path to the folder where the test files are located.
 Then, select the file name and the appropriate settings.
 Once you are ready, click setup and observe the graph.
-Then, adjust the delay to the specified interval.
+Then, adjust the delay to the specified interval and choose the algorithm you want to run.
 Finally, click go to run the specified algorithm.
-
-## THINGS TO NOTICE
-
-This version only works with Kruskal's algorithm. 
-Upon clicking go, instead of looking at the choice, the algorithm will run Kruskal's algorithm.
-
-## EXTENDING THE MODEL
-
-1. Finishing the Prim's algorithm
 
 ## CREDITS AND REFERENCES
 Written by Danzan Achit-Erdene and Majd Hamdan. 
