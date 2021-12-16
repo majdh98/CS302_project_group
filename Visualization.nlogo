@@ -1,68 +1,289 @@
+; Danzan Achit-Erdene
+; Majd Hamdan
+; CSCI0302 - Coding Assignment #2
+; A small bit of the code is adapted from a code written by Mark Wu and Danzan Achit-Erdene,
+; for CSCI0390, which is based on professor Dickerson's in class example for BFS and agent-based BFS
 
+; Visualizes Kruskal's and Prim's algorithms of finding the MST for a given graph.
+; ----------------------------------
+
+breed [vertices vertex]                          ; the nodes of the graph
+
+vertices-own [
+  group                                          ; shows the group of the vertex in a search tree
+]
+
+links-own [
+  in-MST?                                        ; if the link is in the MST or not
+  weight                                         ; the weight of the edge
+]
+
+; Global variables
+globals [
+  file-path                                      ; the path of the test file
+  number-vertices                                ; the number of vertices in the graph
+  number-edges                                   ; the number of edges in the graph
+  list-sorted-graph                              ; the edges of the graph, sorted by weight
+  list-graph                                     ; contains the graph in list form
+]
+
+; Globals defined in the interface
+; MST-algorithm   -- defined by a chooser
+; file-name       -- defined by a chooser
+; show-weight?    -- defined by a switch
+; remove-non-MST? -- defined by a switch
+; delay           -- defined by a slider
+
+; =========== MAIN FUNCTIONS ===========
+; Sets up the program
+to setup
+  ca
+  file-close
+
+  ; Opens the file and reads the contents
+  set file-path "MST-Test-Files/"
+  ask patches [ set pcolor white ]
+
+  file-open word file-path file-name
+  ; Sets the number of vertices and the number of edges from the first line in the file
+  set number-vertices file-read
+  set number-edges file-read
+
+  initialize-graph
+end
+
+; Runs the program
+to go
+  MST-kruskal
+  if remove-non-MST? [ ask links with [in-MST? = False] [die] ]
+end
+
+; =========== FILE READ FUNCTIONS ===========
+; Initializes the data from the file into a list of edges
+to initialize-graph-list
+  set list-graph []
+  let temp-node []
+  repeat number-edges [
+    repeat 3 [
+      set temp-node lput file-read temp-node
+    ]
+    set list-graph lput temp-node list-graph
+    set temp-node []
+  ]
+end
+
+to initialize-graph
+  initialize-graph-list
+  ; Creates the vertices on a random coordinate
+  create-vertices number-vertices [
+    set shape "circle"
+    set size .5
+    set color black
+    set label-color blue
+    set group who
+    setxy random-xcor random-ycor
+    set label word who "   "
+  ]
+
+  let counter 0
+  ; Reads list-graph and creates the edges
+  while [counter < number-edges][
+    let edge item counter list-graph
+    let vertex1 item 0 edge
+    let vertex2 item 1 edge
+    let edge-weight item 2 edge
+    ask vertex vertex1 [ create-link-with vertex vertex2 [ set weight edge-weight set in-MST? False] ]
+    set counter counter + 1
+  ]
+  ; Enable or disable the visibility of weight of edges
+  if show-weight? [
+    ask links [
+      set label weight
+      set label-color green
+    ]
+  ]
+end
+
+; =========== KRUSKAL FUNCTIONS ===========
+; Kruskal's algorithm for MST
+to MST-kruskal
+  sort-by-weight
+  let counter 0;
+  while [counter < number-edges] [
+    let edge item counter list-graph
+    let vertex1 item 0 edge
+    let vertex2 item 1 edge
+    ask link vertex1 vertex2 [set color black set thickness 0.1]
+    wait delay
+
+    let vertex1-group [group] of vertex vertex1
+    let vertex2-group [group] of vertex vertex2
+    if vertex1-group != vertex2-group [
+      ask link vertex1 vertex2 [ set in-MST? True set color green]
+      ask vertex vertex1 [set color red]
+      ask vertex vertex2 [set color red]
+      ask vertices with [group = vertex1-group] [set group vertex2-group]
+    ]
+    set counter counter + 1
+  ]
+end
+
+to sort-by-weight
+  set list-sorted-graph sort-by [ [a b] -> (item 2 a) < (item 2 b) ] list-graph
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
-10
-647
-448
+11
+1442
+639
 -1
 -1
-13.0
+15.121212121212123
 1
 10
 1
 1
 1
 0
+0
+0
 1
-1
-1
--16
-16
--16
-16
+-40
+40
+-20
+20
 0
 0
 1
 ticks
 30.0
 
+CHOOSER
+-1
+19
+211
+64
+MST-algorithm
+MST-algorithm
+"Kruskal's" "Prim's"
+0
+
+CHOOSER
+-1
+63
+210
+108
+file-name
+file-name
+"Int-1000-2000.txt" "Int-1000-dense.txt" "Int-40-80.txt" "Int-500-dense.txt" "Real-1000-2000.txt" "Real-1000-dense.txt" "Real-50-100.txt" "Real-500-1000.txt" "Real-500-dense.txt"
+6
+
+BUTTON
+27
+225
+98
+258
+Setup
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+-1
+107
+210
+140
+show-weight?
+show-weight?
+1
+1
+-1000
+
+BUTTON
+127
+224
+190
+259
+Go
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+-1
+170
+210
+203
+delay
+delay
+0
+2
+0.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+-1
+139
+210
+172
+remove-non-MST?
+remove-non-MST?
+0
+1
+-1000
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+An implementation of the visualization of Kruskal and Prim's algorithms.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+It reads from the file specified by file-name and pulls in the data. 
+Then, it constructs the graph and runs the specified algorithm. 
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Change the variable file-path to the folder where the test files are located.
+Then, select the file name and the appropriate settings.
+Once you are ready, click setup and observe the graph.
+Then, adjust the delay to the specified interval.
+Finally, click go to run the specified algorithm.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+This version only works with Kruskal's algorithm. 
+Upon clicking go, instead of looking at the choice, the algorithm will run Kruskal's algorithm.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+1. Finishing the Prim's algorithm
 
 ## CREDITS AND REFERENCES
+Written by Danzan Achit-Erdene and Majd Hamdan. 
+Loosely based of an implementation by Danzan Achit-Erdene and Mark Wu of an SSSP algorithm written for homework for the class of CSCI3009. 
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+### To sort-by-weight
+Used the ideas from this discussion
+ https://stackoverflow.com/questions/31545569/sorting-list-of-lists-by-particular-index-of-inner-lists
 @#$#@#$#@
 default
 true
