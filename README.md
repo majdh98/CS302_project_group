@@ -1,9 +1,8 @@
 # MST: Kruskal VS Prim
 
 > Authors: Majd Hamdan, Danzan Achit-Erdene
-> 
-...CS 302 - Algorithms and Complexity-Fall 2021-Final Project
-...December 15, 2021
+> CS 302 - Algorithms and Complexity-Fall 2021-Final Project
+> December 15, 2021
 
 In these files, we have implemented two algorithms to find the the minimum spanning tree (MST) of a weighted undirected graph. 
 The first algorithm is kruskal's algorithm. It is implemented with a union-find data structure and has a time complexity 
