@@ -1,3 +1,12 @@
+'''
+Danzan Achit-Erdene, Majd Hamdan
+CSCI0302 - Final Project
+December 15, 2021
+
+Runs out implementation of kruskal and prim algorithms found in Graph_MST_library.py  on the testing files provided by Professor Matthew Dickerson and present their results next to the expected results to confirm the functionality of both algorithms.
+'''
+
+
 import os
 from Graph_MST_library import *
 
