@@ -1,8 +1,10 @@
-# Majd Hamdan, Danzan Achit-Erdene
-# Python program to find Minimum Spanning
-# Tree of a given connected, undirected
-# and weighted graph using Kruskal algorithm
+'''
+Danzan Achit-Erdene, Majd Hamdan
+CSCI0302 - Final Project
+December 15, 2021
 
+Python program to find Minimum Spanning Tree of a given connected, undirected and weighted graph using Kruskal and Prim algorithms
+'''
 import math
 
 class Graph_kruskal:
