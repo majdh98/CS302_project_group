@@ -1,6 +1,6 @@
 # MST: Kruskal VS Prim
 
-> Authors: Majd Hamdan, Danzan Achit-Erdene
+> Authors: Danzan Achit-Erdene, Majd Hamdan
 
 > CS 302 - Algorithms and Complexity-Fall 2021-Final Project
 
